@@ -107,7 +107,8 @@ export async function POST(request: NextRequest) {
         timestamp: now,
         gateId,
         confidence,
-        image,
+        imageUrl: image,
+        detectionData: {},
       },
       status: 'inside',
     });

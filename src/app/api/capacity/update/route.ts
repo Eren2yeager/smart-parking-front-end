@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     // Check for violations and alerts
     const allocatedCapacity = contractor.contractDetails.allocatedCapacity;
-    const alerts = [];
+    const alerts: any[] = [];
     let violation = null;
 
     // Check for capacity breach (occupancy > allocated)
@@ -142,8 +142,9 @@ export async function POST(request: NextRequest) {
         severity: 'critical',
         parkingLotId: data.parkingLotId,
         contractorId: parkingLot.contractorId,
+        title: 'Capacity Breach',
         message: `Capacity breach at ${parkingLot.name}: ${data.occupied}/${allocatedCapacity} vehicles (${data.occupied - allocatedCapacity} excess)`,
-        data: {
+        metadata: {
           occupancy: data.occupied,
           allocatedCapacity,
           excessVehicles: data.occupied - allocatedCapacity,
@@ -155,12 +156,13 @@ export async function POST(request: NextRequest) {
 
       // Also create violation_detected alert
       const violationAlert = await Alert.create({
-        type: 'violation_detected',
-        severity: 'high',
+        type: 'system',
+        severity: 'warning',
         parkingLotId: data.parkingLotId,
         contractorId: parkingLot.contractorId,
+        title: 'Violation Detected',
         message: `Violation detected at ${parkingLot.name}: Contractor exceeded allocated capacity`,
-        data: {
+        metadata: {
           violationId: violation._id,
           violationType: 'capacity_breach',
         },
@@ -171,12 +173,13 @@ export async function POST(request: NextRequest) {
     // Check for capacity warning (occupancy > 90% of total)
     else if (occupancyRate > 0.9) {
       const warningAlert = await Alert.create({
-        type: 'capacity_warning',
-        severity: 'medium',
+        type: 'capacity_full',
+        severity: 'warning',
         parkingLotId: data.parkingLotId,
         contractorId: parkingLot.contractorId,
+        title: 'High Occupancy',
         message: `High occupancy at ${parkingLot.name}: ${Math.round(occupancyRate * 100)}% full`,
-        data: {
+        metadata: {
           occupancy: data.occupied,
           totalSlots: data.totalSlots,
           occupancyRate,

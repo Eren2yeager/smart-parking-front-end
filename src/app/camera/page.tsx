@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { WebRTCClient, Detection } from '@/lib/webrtc-client';
 import CameraPreview from '@/components/CameraPreview';
 
-export default function CameraPage() {
+function CameraPageContent() {
   const searchParams = useSearchParams();
   const parkingLotId = searchParams.get('lotId');
   const cameraType = searchParams.get('type') as 'gate' | 'lot' | null;
   
-  const [backendUrl, setBackendUrl] = useState(process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000');
+  const [backendUrl, setBackendUrl] = useState(process.env.NEXT_PUBLIC_PYTHON_BACKEND_WS_URL || 'ws://localhost:8000');
   const [roomId, setRoomId] = useState(() => {
     // Generate room ID based on parking lot and camera type if provided
     if (parkingLotId && cameraType) {
@@ -471,5 +471,13 @@ export default function CameraPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CameraPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+      <CameraPageContent />
+    </Suspense>
   );
 }

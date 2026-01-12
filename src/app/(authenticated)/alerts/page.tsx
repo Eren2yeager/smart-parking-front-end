@@ -450,11 +450,11 @@ export default function AlertsPage() {
               </div>
 
               {/* Additional Data (if any) */}
-              {alert.data && Object.keys(alert.data).length > 0 && (
+              {alert.metadata && Object.keys(alert.metadata).length > 0 && (
                 <div className="mt-4 pt-4 border-t border-current border-opacity-20">
                   <p className="text-xs font-medium mb-2 opacity-75">Additional Details:</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                    {Object.entries(alert.data).map(([key, value]) => (
+                    {Object.entries(alert.metadata).map(([key, value]) => (
                       <div key={key}>
                         <p className="font-medium opacity-75">{key}:</p>
                         <p className="opacity-60">{String(value)}</p>
