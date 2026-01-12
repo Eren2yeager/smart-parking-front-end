@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 :root {
   --background: #ffffff;
@@ -12,15 +13,91 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Accessibility: Keyboard Focus Indicators */
+/* Ensure all interactive elements have visible focus indicators */
+
+/* Default focus styles for all interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+}
+
+/* Remove default outline but keep focus-visible */
+button:focus,
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* High contrast focus for dark backgrounds */
+.dark button:focus-visible,
+.dark a:focus-visible,
+.dark input:focus-visible,
+.dark select:focus-visible,
+.dark textarea:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Focus styles for form inputs */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  background-color: rgba(33, 150, 243, 0.05);
+  border-color: #2196f3;
+}
+
+/* Focus styles for buttons */
+button:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+}
+
+/* Focus styles for links */
+a:focus-visible {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+/* Ensure custom components respect focus styles */
+[data-focus-visible] {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Skip to content link (hidden until focused) */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #2196f3;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 100;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
