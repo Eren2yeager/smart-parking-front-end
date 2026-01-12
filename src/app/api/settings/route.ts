@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
           cameraOfflineTimeout: 5,
         },
         pythonBackend: {
-          httpUrl: process.env.PYTHON_BACKEND_URL || 'http://localhost:8000',
-          wsUrl: process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000',
+          httpUrl: process.env.PYTHON_BACKEND_URL || process.env.PYTHON_BACKEND_URL || 'http://localhost:8000',
+          wsUrl: process.env.PYTHON_BACKEND_WS_URL || process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000',
         },
         cameras: {
           gateFrameSkip: 2,

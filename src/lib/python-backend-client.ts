@@ -88,7 +88,7 @@ export class PythonBackendClient {
 
   constructor(config: Partial<ConnectionConfig> = {}) {
     this.config = {
-      url: config.url || process.env.PYTHON_BACKEND_URL || 'ws://localhost:8000',
+      url: config.url || process.env.PYTHON_BACKEND_WS_URL || process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000',
       maxReconnectAttempts: config.maxReconnectAttempts ?? 10,
       reconnectDelay: config.reconnectDelay ?? 1000,
       reconnectBackoffMultiplier: config.reconnectBackoffMultiplier ?? 1.5,

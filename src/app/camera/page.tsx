@@ -10,7 +10,7 @@ export default function CameraPage() {
   const parkingLotId = searchParams.get('lotId');
   const cameraType = searchParams.get('type') as 'gate' | 'lot' | null;
   
-  const [backendUrl, setBackendUrl] = useState('ws://localhost:8000');
+  const [backendUrl, setBackendUrl] = useState(process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000');
   const [roomId, setRoomId] = useState(() => {
     // Generate room ID based on parking lot and camera type if provided
     if (parkingLotId && cameraType) {

@@ -39,12 +39,12 @@ const SettingsSchema = new Schema<ISettings>(
       httpUrl: {
         type: String,
         required: true,
-        default: 'http://localhost:8000',
+        default: process.env.PYTHON_BACKEND_URL || process.env.PYTHON_BACKEND_URL || 'http://localhost:8000',
       },
       wsUrl: {
         type: String,
         required: true,
-        default: 'ws://localhost:8000',
+        default: process.env.PYTHON_BACKEND_WS_URL || process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000',
       },
     },
     cameras: {
