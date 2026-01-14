@@ -111,7 +111,7 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # Python Backend
-PYTHON_BACKEND_URL=http://localhost:8000
+NEXT_PUBLIC_PYTHON_BACKEND_URL=http://localhost:8000
 NEXT_PUBLIC_PYTHON_WS_URL=ws://localhost:8000
 ```
 
@@ -406,7 +406,7 @@ npm start
 | `NEXTAUTH_SECRET` | NextAuth secret key | Yes |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID | Yes |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Yes |
-| `PYTHON_BACKEND_URL` | Python backend HTTP URL | Yes |
+| `NEXT_PUBLIC_PYTHON_BACKEND_URL` | Python backend HTTP URL | Yes |
 | `NEXT_PUBLIC_PYTHON_WS_URL` | Python backend WebSocket URL | Yes |
 
 ## Browser Support

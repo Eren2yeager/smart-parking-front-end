@@ -7,7 +7,7 @@ type TestMode = 'http' | 'websocket' | 'stream' | 'remote';
 type EndpointType = 'gate' | 'lot' | 'vehicle';
 
 export default function TestBackendPage() {
-  const [backendUrl, setBackendUrl] = useState(process.env.PYTHON_BACKEND_URL || 'http://localhost:8000');
+  const [backendUrl, setBackendUrl] = useState(process.env.NEXT_PUBLIC_PYTHON_BACKEND_URL || 'http://localhost:8000');
   const [testMode, setTestMode] = useState<TestMode>('http');
   const [endpointType, setEndpointType] = useState<EndpointType>('gate');
   
@@ -49,7 +49,7 @@ export default function TestBackendPage() {
   // WebRTC Remote Stream state
   const [remoteConnected, setRemoteConnected] = useState(false);
   const [roomId, setRoomId] = useState('parking-camera-1');
-  const [signalingUrl, setSignalingUrl] = useState(process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000');
+  const [signalingUrl, setSignalingUrl] = useState(process.env.NEXT_PUBLIC_PYTHON_BACKEND_WS_URL || 'ws://localhost:8000');
   const [remoteFps, setRemoteFps] = useState(10);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const remoteCanvasRef = useRef<HTMLCanvasElement>(null);

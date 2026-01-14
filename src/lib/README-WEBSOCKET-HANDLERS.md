@@ -106,7 +106,7 @@ stopLotMonitor();
 
 Add to `.env.local`:
 ```
-PYTHON_BACKEND_URL=ws://localhost:8000
+NEXT_PUBLIC_PYTHON_BACKEND_URL=ws://localhost:8000
 ```
 
 ## Integration with Next.js
