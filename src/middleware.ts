@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { auth } from '@/app/api/auth/[...nextauth]/route';
 
 // Define protected routes that require authentication
 const protectedRoutes = [
@@ -29,11 +30,16 @@ const publicRoutes = [
   '/api/debug-session',
 ];
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
 
-  // Allow public routes
+  // Allow public routes and auth callbacks
   if (publicRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  // Allow static files and assets
+  if (pathname.includes('.') || pathname.startsWith('/_next')) {
     return NextResponse.next();
   }
 
@@ -42,23 +48,21 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = adminRoutes.some(route => pathname.startsWith(route));
 
   if (isProtectedRoute || isAdminRoute) {
-    // Check for session cookie
-    const sessionToken = request.cookies.get('next-auth.session-token') || 
-                        request.cookies.get('__Secure-next-auth.session-token');
-
-    // Redirect to login if not authenticated
-    if (!sessionToken) {
-      const loginUrl = new URL('/login', request.url);
+    // Check if user is authenticated
+    if (!req.auth) {
+      const loginUrl = new URL('/login', req.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    // For admin routes, we'll check permissions in the page component
-    // since we can't decode JWT in edge runtime without crypto
+    // For admin routes, check if user has admin role
+    if (isAdminRoute && req.auth.user?.role !== 'admin') {
+      return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
   }
 
   return NextResponse.next();
-}
+});
 
 // Configure which routes to run middleware on
 export const config = {
