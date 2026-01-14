@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { auth } from '@/app/api/auth/[...nextauth]/route';
 
+// Force Node.js runtime instead of Edge runtime
+export const runtime = 'nodejs';
+
 // Define protected routes that require authentication
 const protectedRoutes = [
   '/dashboard',
