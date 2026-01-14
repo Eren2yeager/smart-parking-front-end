@@ -54,8 +54,8 @@ export default function SettingsForm({ initialData, onSuccess }: SettingsFormPro
       cameraOfflineTimeout: initialData?.alertThresholds?.cameraOfflineTimeout ?? 5,
     },
     pythonBackend: {
-      httpUrl: initialData?.pythonBackend?.httpUrl || process.env.PYTHON_BACKEND_URL || 'http://localhost:8000',
-      wsUrl: initialData?.pythonBackend?.wsUrl || process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000',
+      httpUrl: initialData?.pythonBackend?.httpUrl || process.env.NEXT_PUBLIC_PYTHON_BACKEND_URL || 'http://localhost:8000',
+      wsUrl: initialData?.pythonBackend?.wsUrl || process.env.NEXT_PUBLIC_PYTHON_BACKEND_WS_URL || 'ws://localhost:8000',
     },
     cameras: {
       gateFrameSkip: initialData?.cameras?.gateFrameSkip ?? 2,

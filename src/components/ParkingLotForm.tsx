@@ -181,7 +181,7 @@ export default function ParkingLotForm({
       const formData = new FormData();
       formData.append('file', selectedImage);
 
-      const backendUrl = process.env.PYTHON_BACKEND_URL || 'http://localhost:8000';
+      const backendUrl = process.env.NEXT_PUBLIC_PYTHON_BACKEND_URL || 'http://localhost:8000';
       const response = await fetch(`${backendUrl}/api/detect-parking-slots`, {
         method: 'POST',
         body: formData,

@@ -40,7 +40,7 @@ export default function LiveMonitorPage() {
   // WebRTC Remote Stream state
   const [remoteConnected, setRemoteConnected] = useState(false);
   const [roomId, setRoomId] = useState('');
-  const [signalingUrl] = useState(process.env.PYTHON_BACKEND_WS_URL || 'ws://localhost:8000');
+  const [signalingUrl] = useState(process.env.NEXT_PUBLIC_PYTHON_BACKEND_WS_URL || 'ws://localhost:8000');
   const [remoteFps] = useState(10);
   const [lastDetection, setLastDetection] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);

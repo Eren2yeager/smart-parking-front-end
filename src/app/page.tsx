@@ -17,9 +17,14 @@ import {
 
 export default async function Home() {
   // Redirect to dashboard if already authenticated
-  const session = await auth();
-  if (session?.user) {
-    redirect('/dashboard');
+  try {
+    const session = await auth();
+    if (session?.user) {
+      redirect('/dashboard');
+    }
+  } catch (error) {
+    console.error('Auth check failed on home page:', error);
+    // Continue rendering the page even if auth fails
   }
 
   return (
