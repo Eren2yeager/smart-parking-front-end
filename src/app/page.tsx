@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { auth } from '@/app/api/auth/[...nextauth]/route';
 import { 
   Car, 
   Shield, 
@@ -13,7 +15,13 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-export default function Home() {
+export default async function Home() {
+  // Redirect to dashboard if already authenticated
+  const session = await auth();
+  if (session?.user) {
+    redirect('/dashboard');
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-600 via-indigo-700 to-purple-800">
       {/* Hero Section */}

@@ -4,37 +4,36 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  trustHost: true, // Required for NextAuth v5 in production
+  trustHost: true,
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
   ],
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  cookies: {
-    sessionToken: {
-      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-      },
-    },
-  },
   pages: {
     signIn: '/login',
+    error: '/login',
   },
+  debug: process.env.NODE_ENV === 'development',
   callbacks: {
     async signIn({ user, account }) {
       try {
         await connectDB();
 
         if (!user.email) {
+          console.error('No email provided');
           return false;
         }
 
@@ -51,12 +50,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             role: 'viewer', // Default role
             lastLogin: new Date(),
           });
+          console.log('Created new user:', user.email);
         } else {
           // Update existing user
           dbUser.lastLogin = new Date();
           dbUser.name = user.name || dbUser.name;
           dbUser.image = user.image || dbUser.image;
           await dbUser.save();
+          console.log('Updated existing user:', user.email);
         }
 
         return true;
@@ -66,30 +67,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
     },
 
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
+
     async jwt({ token, user, trigger, session }) {
-      // Initial sign in
+      // Initial sign in - add user data to token
       if (user) {
-        await connectDB();
-        const dbUser = await User.findOne({ email: user.email });
-        
-        if (dbUser) {
-          token.id = dbUser._id.toString();
-          token.role = dbUser.role;
-          token.email = dbUser.email;
-          token.name = dbUser.name;
-          token.picture = dbUser.image;
+        try {
+          await connectDB();
+          const dbUser = await User.findOne({ email: user.email });
+          
+          if (dbUser) {
+            token.id = dbUser._id.toString();
+            token.role = dbUser.role;
+            token.email = dbUser.email;
+            token.name = dbUser.name;
+            token.picture = dbUser.image;
+            console.log('JWT token created for:', user.email);
+          } else {
+            console.error('User not found in DB after sign in:', user.email);
+          }
+        } catch (error) {
+          console.error('Error in jwt callback (initial):', error);
         }
       }
 
       // Handle session updates
       if (trigger === 'update' && session) {
-        await connectDB();
-        const dbUser = await User.findOne({ email: token.email });
-        
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.name = dbUser.name;
-          token.picture = dbUser.image;
+        try {
+          await connectDB();
+          const dbUser = await User.findOne({ email: token.email });
+          
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.name = dbUser.name;
+            token.picture = dbUser.image;
+          }
+        } catch (error) {
+          console.error('Error in jwt callback (update):', error);
         }
       }
 
