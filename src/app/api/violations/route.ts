@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Violation from '@/models/Violation';
+import Contractor from '@/models/Contractor';
 import { requireAuth, handleAuthError } from '@/lib/auth';
 
 /**

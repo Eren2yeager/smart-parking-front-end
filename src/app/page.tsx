@@ -23,6 +23,10 @@ export default async function Home() {
       redirect('/dashboard');
     }
   } catch (error) {
+        // Ignore NEXT_REDIRECT errors as they are expected behavior
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+      throw error;
+    }
     console.error('Auth check failed on home page:', error);
     // Continue rendering the page even if auth fails
   }

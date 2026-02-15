@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import dbConnect from '@/lib/mongodb';
 import ParkingLot from '@/models/ParkingLot';
+import Contractor from '@/models/Contractor';
 import CapacityLog from '@/models/CapacityLog';
 import { requireAuth, handleAuthError } from '@/lib/auth';
 

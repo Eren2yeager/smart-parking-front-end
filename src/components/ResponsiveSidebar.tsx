@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Bell,
   BarChart3,
+  Settings,
   Menu,
   X,
 } from 'lucide-react';
@@ -66,6 +67,12 @@ const navItems: NavItem[] = [
     href: '/analytics',
     icon: BarChart3,
     roles: ['admin', 'operator', 'viewer'],
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+    roles: ['admin'],
   },
 ];
 
