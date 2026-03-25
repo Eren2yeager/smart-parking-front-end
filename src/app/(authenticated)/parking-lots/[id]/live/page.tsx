@@ -60,9 +60,7 @@ export default function LiveMonitorPage() {
   const [remoteConnected, setRemoteConnected] = useState(false);
   const [roomId, setRoomId] = useState("");
   const [signalingUrl] = useState(
-    process.env.NEXT_PUBLIC_PATHWAY_BACKEND_WS_URL ||
-      process.env.NEXT_PUBLIC_PYTHON_BACKEND_WS_URL ||
-      "ws://localhost:8000",
+    process.env.NEXT_PUBLIC_AI_BACKEND_WS_URL || "ws://localhost:8000",
   );
   const [remoteFps] = useState(10);
   const [lastDetection, setLastDetection] = useState<any>(null);
@@ -244,7 +242,7 @@ export default function LiveMonitorPage() {
                 await ws.connect(
                   async (data) => {
                     setIsProcessing(false);
-                    // Normalize Pathway single-plate to { plates: [...] } so overlay can draw
+                    // Normalize single-plate WS payload to { plates: [...] } so overlay can draw
                     if (
                       data.event_type === "plate_detected" &&
                       data.plate_number &&
@@ -265,15 +263,15 @@ export default function LiveMonitorPage() {
                     }
                     setLastDetection(data);
 
-                    const isPathwayPlate =
+                    const isAiBackendPlate =
                       data.event_type === "plate_detected" && data.plate_number;
                     const isLegacyPlate =
                       data.type === "plate_detection" &&
                       (data.plates_detected ?? 0) > 0;
 
-                    if (isPathwayPlate) {
+                    if (isAiBackendPlate) {
                       addLog(
-                        `🚗 Plate: ${data.plate_number} (Pathway → DB via webhook)`,
+                        `🚗 Plate: ${data.plate_number} (AI backend → DB via webhook)`,
                       );
                     } else if (isLegacyPlate) {
                       addLog(`🚗 ${data.plates_detected} plate(s) detected`);

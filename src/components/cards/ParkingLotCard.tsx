@@ -41,22 +41,22 @@ function getOccupancyColor(occupancyRate: number): {
   if (occupancyRate >= 90) {
     // Critical - Red
     return {
-      bg: theme.colors.error[50],
-      border: theme.colors.error[300],
+      bg: theme.colors.error[300],
+      border: theme.colors.error[500],
       text: theme.colors.error[800],
     };
   } else if (occupancyRate >= 70) {
     // Warning - Yellow
     return {
-      bg: theme.colors.warning[50],
-      border: theme.colors.warning[300],
+      bg: theme.colors.warning[300],
+      border: theme.colors.warning[500],
       text: theme.colors.warning[800],
     };
   } else {
     // Good - Green
     return {
-      bg: theme.colors.success[50],
-      border: theme.colors.success[300],
+      bg: theme.colors.success[300],
+      border: theme.colors.success[500],
       text: theme.colors.success[800],
     };
   }
@@ -84,7 +84,7 @@ export default function ParkingLotCard({ lot }: ParkingLotCardProps) {
         style={{
           backgroundColor: colors.bg,
           borderRadius: theme.borderRadius.lg,
-          border: `2px solid ${colors.border}`,
+          border: `4px solid ${colors.border}`,
           boxShadow: theme.shadows.base,
           cursor: "pointer",
           opacity: lot.status === "inactive" ? 0.6 : 1,

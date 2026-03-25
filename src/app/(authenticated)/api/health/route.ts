@@ -24,8 +24,8 @@ export async function GET() {
 
   try {
     const baseUrl =
-      process.env.NEXT_PUBLIC_PATHWAY_BACKEND_URL ||
-      process.env.NEXT_PUBLIC_PYTHON_BACKEND_URL ||
+      process.env.NEXT_PUBLIC_AI_BACKEND_URL ||
+
       'http://localhost:8000';
 
     const controller = new AbortController();

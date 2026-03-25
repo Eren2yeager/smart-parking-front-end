@@ -89,7 +89,7 @@ export default function DashboardPage() {
     // Auto-refresh every 30 seconds
     const interval = setInterval(fetchParkingLots, 30000);
 
-    // Real-time: patch occupancy in-state whenever Pathway fires a capacity_update
+    // Real-time: patch occupancy in-state whenever the AI backend sends capacity_update
     const es = new EventSource("/api/sse/dashboard");
     es.addEventListener("capacity_update", (e: MessageEvent) => {
       try {

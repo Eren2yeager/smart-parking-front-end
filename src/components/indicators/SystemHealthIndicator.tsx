@@ -181,7 +181,7 @@ export default function SystemHealthIndicator() {
                 }}
                 className="dark:text-[#e5e7eb]"
               >
-                Pathway Backend
+                AI Backend
               </p>
               <p
                 style={{

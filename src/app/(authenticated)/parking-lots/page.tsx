@@ -101,7 +101,7 @@ export default function ParkingLotsPage() {
     fetchParkingLots();
     fetchContractors();
 
-    // Real-time: patch occupancy in-state whenever Pathway fires a capacity_update
+    // Real-time: patch occupancy in-state whenever the AI backend sends capacity_update
     // Close any existing connection first (filters may have changed)
     if (eventSourceRef.current) {
       eventSourceRef.current.close();

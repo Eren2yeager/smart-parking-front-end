@@ -1,6 +1,6 @@
 # 🅿️ Smart Parking Management System — Next.js Frontend
 
-Real-time parking management dashboard powered by **Next.js 15 App Router**, **MongoDB**, **Server-Sent Events**, and the [Pathway](https://pathway.com/) AI/ML backend.
+Real-time parking management dashboard powered by **Next.js 15 App Router**, **MongoDB**, **Server-Sent Events**, and the **AI backend** (FastAPI) for vision and webhooks.
 
 > **Just getting started?** → See **[QUICKSTART.md](./QUICKSTART.md)** for a step-by-step setup guide.
 
@@ -21,11 +21,11 @@ Real-time parking management dashboard powered by **Next.js 15 App Router**, **M
 - Interactive Leaflet map with occupancy color coding
 - Dashboard stats: total lots, capacity, current occupancy, active violations
 - Activity feed grouped by time period
-- System health panel (database, Pathway backend, SSE connections)
+- System health panel (database, AI backend, SSE connections)
 
 ### 📱 Mobile Camera Streaming
 
-- WebRTC streaming from mobile browsers to the Pathway backend
+- WebRTC streaming from mobile browsers to the AI backend
 - Live detection overlay on camera preview
 - Works on iOS Safari 14+ and Chrome Android 90+
 
@@ -37,14 +37,14 @@ Real-time parking management dashboard powered by **Next.js 15 App Router**, **M
 
 ### ⚙️ Settings (Admin)
 
-- Pathway/backend URL configuration
+- AI backend URL configuration
 - Alert threshold customization (capacity warning %, offline timeouts)
 - Camera frame-skip tuning
 - User role management
 
 ### 🔄 Real-Time Architecture
 
-- **Pathway → Webhook** → `POST /api/pathway/webhook/capacity`
+- **AI backend → Webhook** → `POST /api/ai/webhook/capacity`
 - **Webhook → DB** (`CapacityLog` + `ParkingLot.slots` update)
 - **DB → SSE** (`/api/sse/dashboard` broadcasts `capacity_update` event)
 - **SSE → UI** (all open pages patch state in-place, zero reload)
@@ -75,7 +75,7 @@ next.js-work/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── pathway/webhook/   # Pathway → Next.js webhook receivers
+│   │   │   ├── ai/webhook/        # AI backend → Next.js webhook receivers
 │   │   │   │   ├── capacity/      # Capacity updates from lot monitor
 │   │   │   │   ├── entry/         # Vehicle entry from gate monitor
 │   │   │   │   └── exit/          # Vehicle exit from gate monitor
@@ -106,7 +106,7 @@ next.js-work/
 │   │   ├── sse-manager.ts         # SSE singleton (globalThis, survives HMR)
 │   │   ├── mongodb.ts             # Mongoose connection helper
 │   │   ├── auth.ts                # NextAuth helpers
-│   │   ├── webhook-auth.ts        # Pathway webhook HMAC verification
+│   │   ├── webhook-auth.ts        # AI webhook secret verification
 │   │   └── ...
 │   └── models/                    # Mongoose models
 │       ├── ParkingLot.ts
@@ -141,13 +141,13 @@ next.js-work/
 | `GET`  | `/api/capacity/history` | Historical logs with date range                   |
 | `POST` | `/api/capacity/update`  | Internal: process capacity update + SSE broadcast |
 
-### Pathway Webhooks (called by the Python backend)
+### AI backend webhooks (called by the Python service)
 
 | Method | Endpoint                        | Description                            |
 | ------ | ------------------------------- | -------------------------------------- |
-| `POST` | `/api/pathway/webhook/capacity` | Slot occupancy update from lot monitor |
-| `POST` | `/api/pathway/webhook/entry`    | Vehicle entry from gate monitor        |
-| `POST` | `/api/pathway/webhook/exit`     | Vehicle exit from gate monitor         |
+| `POST` | `/api/ai/webhook/capacity` | Slot occupancy update from lot monitor |
+| `POST` | `/api/ai/webhook/entry`    | Vehicle entry from gate monitor        |
+| `POST` | `/api/ai/webhook/exit`     | Vehicle exit from gate monitor         |
 
 ### Real-time
 
@@ -185,9 +185,9 @@ next.js-work/
 | `NEXT_PUBLIC_APP_URL`               | ✅       | Same as NEXTAUTH_URL — used for server-side self-calls |
 | `GOOGLE_CLIENT_ID`                  | ✅       | Google OAuth client ID                                 |
 | `GOOGLE_CLIENT_SECRET`              | ✅       | Google OAuth client secret                             |
-| `NEXT_PUBLIC_PYTHON_BACKEND_URL`    | ✅       | Pathway backend HTTP URL                               |
-| `NEXT_PUBLIC_PYTHON_BACKEND_WS_URL` | ✅       | Pathway backend WebSocket URL                          |
-| `PATHWAY_WEBHOOK_SECRET`            | ✅       | Shared secret for authenticating Pathway webhooks      |
+| `NEXT_PUBLIC_AI_BACKEND_URL`        | ✅       | AI backend HTTP URL |
+| `NEXT_PUBLIC_AI_BACKEND_WS_URL`     | ✅       | AI backend WebSocket URL |
+| `AI_WEBHOOK_SECRET`                 | ✅       | Shared secret for authenticating webhooks (header `X-AI-Secret`) |
 
 ---
 

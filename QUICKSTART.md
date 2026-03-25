@@ -7,7 +7,7 @@
 | Node.js         | 18+                                                 |
 | npm / pnpm      | any recent                                          |
 | MongoDB         | local (`mongod`) or Atlas URI                       |
-| Pathway backend | running on `localhost:8000` (see `../pathway-work`) |
+| AI backend      | running on `localhost:8000` (see `../ai-work`) |
 
 ---
 
@@ -39,12 +39,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
-# ── Pathway / Python Backend ──────────────────────────────────────────────
-NEXT_PUBLIC_PYTHON_BACKEND_URL=http://localhost:8000
-NEXT_PUBLIC_PYTHON_BACKEND_WS_URL=ws://localhost:8000
+# ── AI backend (HTTP + WS) ───────────────────────────────────────────────
+NEXT_PUBLIC_AI_BACKEND_URL=http://localhost:8000
+NEXT_PUBLIC_AI_BACKEND_WS_URL=ws://localhost:8000
 
-# ── Webhook Auth (must match PATHWAY_WEBHOOK_SECRET in pathway-work/.env) ─
-PATHWAY_WEBHOOK_SECRET=your-shared-secret
+# ── Webhook auth (must match AI_WEBHOOK_SECRET in backend .env) ───────────
+AI_WEBHOOK_SECRET=your-shared-secret
 ```
 
 > **NEXTAUTH_SECRET** — generate a secure value with:
@@ -62,15 +62,15 @@ PATHWAY_WEBHOOK_SECRET=your-shared-secret
 
 ### Option A — All-in-one (recommended)
 
-Start MongoDB, the Pathway backend, then the Next.js dev server:
+Start MongoDB, the AI backend, then the Next.js dev server:
 
 ```bash
 # Terminal 1 – MongoDB (if running locally)
 mongod
 
-# Terminal 2 – Pathway backend
-cd ../pathway-work
-python main.py          # or: docker-compose up --build -d
+# Terminal 2 – AI backend
+cd ../ai-work
+python main.py
 
 # Terminal 3 – Next.js
 cd ../next.js-work
@@ -109,7 +109,7 @@ Open [http://localhost:3000](http://localhost:3000)
 | --------------- | ----------------------------------------------------------------------------------------------------------- |
 | App loads       | `http://localhost:3000` shows the login page                                                                |
 | DB connected    | `http://localhost:3000/api/health` returns `"database": "connected"`                                        |
-| Pathway backend | `http://localhost:3000/api/health` returns `"pathway_backend": "connected"`                                 |
+| AI backend      | `http://localhost:3000/api/health` returns `"pythonBackend": "online"` (when backend reachable)            |
 | Real-time SSE   | Open DevTools → Network, filter `EventStream`, refresh dashboard — you should see `/api/sse/dashboard` open |
 
 ---
@@ -138,12 +138,12 @@ Make sure `http://localhost:3000/api/auth/callback/google` is in **Authorized re
 
 Start `mongod` or check your `MONGODB_URI`. For Atlas, whitelist your IP.
 
-### Pathway webhook not reaching Next.js
+### AI webhook not reaching Next.js
 
-Check `NEXT_PUBLIC_APP_URL` matches the URL Next.js is running on. The Pathway backend calls this URL to send capacity updates.
+Check `NEXT_PUBLIC_APP_URL` matches the URL Next.js is running on. The AI backend sends webhooks to `NEXTJS_API_URL` from its `.env`.
 
 ### Real-time data not updating
 
-1. Confirm the Pathway backend is running and connected via WebSocket
-2. Check `PATHWAY_WEBHOOK_SECRET` matches in both `.env.local` (Next.js) and the Pathway backend `.env`
+1. Confirm the AI backend is running and the browser can open its WebSocket URL
+2. Check `AI_WEBHOOK_SECRET` matches in both `.env.local` (Next.js) and the backend `.env`, and webhooks use header `X-AI-Secret`
 3. Check the browser console for SSE connection errors on `/api/sse/dashboard`

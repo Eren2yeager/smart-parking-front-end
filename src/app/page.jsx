@@ -98,8 +98,8 @@ export default async function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-30 h-30 rounded-2xl shadow-lg mb-6 hover:scale-110 transition-transform">
-              <AnimatedCarIcon className="w-30 h-30" />
+            <div className="inline-flex items-center justify-center w-25 h-25 rounded-2xl shadow-lg mb-6 hover:scale-110 transition-transform">
+              <AnimatedCarIcon className="w-25 h-25" />
             </div>
             <h1 className="text-5xl md:text-6xl font-bold pb-6  bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white">
               Smart Parking Management

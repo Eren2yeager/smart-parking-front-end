@@ -4,12 +4,11 @@ import { verifyWebhookSecret } from "@/lib/auth/webhook-auth";
 const PARKING_LOT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
 
 /**
- * Webhook: capacity update from Pathway lot monitor.
+ * Webhook: capacity update from AI backend lot monitor.
  * Expects: parking_lot_id, total_slots, occupied, empty (optional), slots (optional), timestamp.
  * parking_lot_id must be 24-char hex. empty is computed as total_slots - occupied if missing.
  */
 export async function POST(request: NextRequest) {
-  // Authenticate webhook request
   const authError = verifyWebhookSecret(request);
   if (authError) return authError;
 
@@ -26,7 +25,7 @@ export async function POST(request: NextRequest) {
       : Math.max(0, totalSlots - occupied);
     const slotsCount = data.slots?.length ?? 0;
 
-    console.log("[Pathway webhook/capacity] Received:", {
+    console.log("[AI webhook/capacity] Received:", {
       parkingLotId,
       totalSlots,
       occupied,
@@ -36,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (!parkingLotId) {
       console.warn(
-        "[Pathway webhook/capacity] Rejected: missing parking_lot_id",
+        "[AI webhook/capacity] Rejected: missing parking_lot_id",
       );
       return NextResponse.json(
         { success: false, error: "Missing parking_lot_id" },
@@ -45,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
     if (!PARKING_LOT_ID_REGEX.test(parkingLotId)) {
       console.warn(
-        "[Pathway webhook/capacity] Rejected: parking_lot_id must be 24-char hex, got:",
+        "[AI webhook/capacity] Rejected: parking_lot_id must be 24-char hex, got:",
         parkingLotId.slice(0, 30),
       );
       return NextResponse.json(
@@ -83,7 +82,7 @@ export async function POST(request: NextRequest) {
     };
 
     console.log(
-      "[Pathway webhook/capacity] Forwarding to /api/capacity/update:",
+      "[AI webhook/capacity] Forwarding to /api/capacity/update:",
       {
         parkingLotId,
         totalSlots,
@@ -93,7 +92,6 @@ export async function POST(request: NextRequest) {
       },
     );
 
-    // Forward to existing capacity update API
     const baseUrl =
       process.env.NEXTAUTH_URL ||
       process.env.NEXT_PUBLIC_APP_URL ||
@@ -109,7 +107,7 @@ export async function POST(request: NextRequest) {
     const responseText = await response.text();
     if (!response.ok) {
       console.warn(
-        "[Pathway webhook/capacity] /api/capacity/update response:",
+        "[AI webhook/capacity] /api/capacity/update response:",
         response.status,
         responseText.substring(0, 200),
       );
@@ -117,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       console.error(
-        "[Pathway webhook/capacity] /api/capacity/update failed:",
+        "[AI webhook/capacity] /api/capacity/update failed:",
         response.status,
         responseText.slice(0, 300),
       );
@@ -133,7 +131,7 @@ export async function POST(request: NextRequest) {
 
     const result = JSON.parse(responseText);
     console.log(
-      "[Pathway webhook/capacity] Success:",
+      "[AI webhook/capacity] Success:",
       parkingLotId,
       occupied,
       totalSlots,
@@ -145,7 +143,7 @@ export async function POST(request: NextRequest) {
       data: result.data,
     });
   } catch (error: any) {
-    console.error("[Pathway webhook/capacity] Error:", error?.message ?? error);
+    console.error("[AI webhook/capacity] Error:", error?.message ?? error);
     return NextResponse.json(
       {
         success: false,

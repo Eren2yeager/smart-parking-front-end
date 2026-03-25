@@ -32,9 +32,7 @@ function CameraPageContent() {
   const cameraType = searchParams.get('type') as 'gate' | 'lot' | null;
   
   const [backendUrl, setBackendUrl] = useState(
-    process.env.NEXT_PUBLIC_PATHWAY_BACKEND_WS_URL || 
-    process.env.NEXT_PUBLIC_PYTHON_BACKEND_WS_URL || 
-    'ws://localhost:8000'
+    process.env.NEXT_PUBLIC_AI_BACKEND_WS_URL || 'ws://localhost:8000'
   );
   const [roomId, setRoomId] = useState(() => {
     if (parkingLotId && cameraType) {
