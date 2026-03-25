@@ -131,23 +131,21 @@ export default function OccupancyChart({ parkingLotId, hours = 24 }: OccupancyCh
 
       <ResponsiveContainer width="100%" height={chartHeight}>
         <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" darkStroke="#2a2e37" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis
             dataKey="time"
             stroke="#6b7280"
-            darkStroke="#9ca3af"
             style={{ fontSize: isMobile ? '10px' : '12px' }}
-            tick={{ fill: '#6b7280', darkFill: '#9ca3af' }}
+            tick={{ fill: '#6b7280' }}
             interval={isMobile ? 'preserveStartEnd' : 'preserveEnd'}
           />
           <YAxis
             stroke="#6b7280"
-            darkStroke="#9ca3af"
             style={{ fontSize: isMobile ? '10px' : '12px' }}
-            tick={{ fill: '#6b7280', darkFill: '#9ca3af' }}
+            tick={{ fill: '#6b7280' }}
             label={
               !isMobile
-                ? { value: 'Vehicles', angle: -90, position: 'insideLeft', fill: '#6b7280', darkFill: '#9ca3af' }
+                ? { value: 'Vehicles', angle: -90, position: 'insideLeft', fill: '#6b7280' }
                 : undefined
             }
           />
@@ -155,13 +153,6 @@ export default function OccupancyChart({ parkingLotId, hours = 24 }: OccupancyCh
             contentStyle={{
               backgroundColor: '#fff',
               border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              padding: '8px 12px',
-              fontSize: isMobile ? '12px' : '14px',
-            }}
-            darkContentStyle={{
-              backgroundColor: '#111316',
-              border: '1px solid #2a2e37',
               borderRadius: '8px',
               padding: '8px 12px',
               fontSize: isMobile ? '12px' : '14px',
@@ -196,7 +187,6 @@ export default function OccupancyChart({ parkingLotId, hours = 24 }: OccupancyCh
             type="monotone"
             dataKey="capacity"
             stroke="#d1d5db"
-            darkStroke="#3a3f4b"
             strokeWidth={isMobile ? 1.5 : 2}
             strokeDasharray="5 5"
             dot={false}

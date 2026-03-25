@@ -183,14 +183,13 @@ export function SkeletonRectangle({
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
     <div
-      className={className}
+      className={`${className} dark:bg-[#111316]`}
       style={{
         padding: theme.spacing[4],
         backgroundColor: theme.colors.background.paper,
         borderRadius: theme.borderRadius.lg,
         boxShadow: theme.shadows.base,
       }}
-      className="dark:bg-[#111316]"
     >
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: theme.spacing[4] }}>
         <SkeletonCircle size="3rem" />

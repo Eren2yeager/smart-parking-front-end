@@ -1,6 +1,6 @@
 'use client';
 
-import { useNetworkStatus, useQueuedActions } from '@/lib/offline-manager';
+import { useNetworkStatus, useQueuedActions } from '@/lib/utils/offline-manager';
 
 interface OfflineBannerProps {
   className?: string;

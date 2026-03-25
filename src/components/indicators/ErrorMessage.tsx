@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertCircle, XCircle, Database, WifiOff, Server, AlertTriangle } from 'lucide-react';
-import { formatErrorForDisplay, getErrorIcon } from '@/lib/error-messages';
+import { formatErrorForDisplay, getErrorIcon } from '@/lib/utils/error-messages';
 import { Button } from '@/components/misc/Button';
 
 interface ErrorMessageProps {

@@ -2,16 +2,22 @@ import connectDB from '@/lib/db/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
 
-export async function credentialsAuthorize(credentials: Record<"email" | "password", string> | undefined) {
+export async function credentialsAuthorize(
+  credentials: Partial<Record<"email" | "password", unknown>> | undefined,
+  request: any
+) {
   try {
     if (!credentials?.email || !credentials?.password) {
       throw new Error('Email and password are required');
     }
 
+    const email = String(credentials.email);
+    const password = String(credentials.password);
+
     await connectDB();
 
     // Find user by email
-    const user = await User.findOne({ email: credentials.email });
+    const user = await User.findOne({ email });
     
     if (!user) {
       throw new Error('Invalid email or password');
@@ -23,7 +29,7 @@ export async function credentialsAuthorize(credentials: Record<"email" | "passwo
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     
     if (!isPasswordValid) {
       throw new Error('Invalid email or password');

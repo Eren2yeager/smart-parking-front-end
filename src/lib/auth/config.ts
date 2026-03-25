@@ -1,10 +1,10 @@
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
-import { AuthOptions } from 'next-auth';
+import type { NextAuthConfig } from 'next-auth';
 import { credentialsAuthorize } from './providers/credentials';
 import { authCallbacks } from './callbacks';
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthConfig = {
   trustHost: true,
   providers: [
     Google({

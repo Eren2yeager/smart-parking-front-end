@@ -1,6 +1,7 @@
+'use client'
 import { redirect } from "next/navigation";
-import { auth } from "@/app/api/auth/[...nextauth]/route";
-import { Shield, Users, TrendingUp, Clock, ArrowRight } from "lucide-react";
+import { getSession } from "next-auth/react";
+import { Shield, Users, TrendingUp, Clock } from "lucide-react";
 import Hyperspeed from "@/components/shadcnComponents/Hyperspeed";
 import { AnimatedCarIcon } from "@/components/icons/animated-car";
 import { AnimatedCameraIcon } from "@/components/icons/animated-camera";
@@ -14,12 +15,12 @@ import { FloatingOrbs } from "@/components/landing/floating-orbs";
 import { ScrollIndicator } from "@/components/landing/scroll-indicator";
 import { HeroButtons } from "@/components/landing/hero-buttons";
 import GradualBlur from "@/components/shadcnComponents/GradualBlur";
-export default async function Home() {
+export default  function Home() {
   let isAuthenticated = false;
-
+  
   // Check authentication status
   try {
-    const session = await auth();
+    const {data : session} = getSession();
     if (session?.user) {
       isAuthenticated = true;
       // Check if user needs to set up password
