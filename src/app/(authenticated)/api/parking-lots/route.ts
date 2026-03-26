@@ -18,6 +18,17 @@ const createParkingLotSchema = z.object({
   }),
   totalSlots: z.number().int().min(1).max(500),
   contractorId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid contractor ID"),
+  detectedSlots: z.array(z.object({
+    slotId: z.number().int().min(1),
+    status: z.string(),
+    confidence: z.number().min(0).max(1),
+    bbox: z.object({
+      x1: z.number(),
+      y1: z.number(),
+      x2: z.number(),
+      y2: z.number(),
+    }),
+  })).optional(),
 });
 
 /**
@@ -139,19 +150,27 @@ export async function POST(request: NextRequest) {
     const gateCameraId = `gate_${timestamp}_${Math.random().toString(36).substring(7)}`;
     const lotCameraId = `lot_${timestamp}_${Math.random().toString(36).substring(7)}`;
 
-    // Initialize slots array with placeholder slots
-    // Each slot starts as 'empty' with default bbox coordinates
-    const slots = Array.from({ length: data.totalSlots }, (_, index) => ({
-      slotId: index + 1,
-      bbox: {
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 0,
-      },
-      status: "empty" as const,
-      lastUpdated: new Date(),
-    }));
+    // Initialize slots array
+    // If AI detected slots with bbox are provided, use them
+    // Otherwise, create placeholder slots with default bbox
+    const slots = data.detectedSlots && data.detectedSlots.length > 0
+      ? data.detectedSlots.map((detectedSlot) => ({
+          slotId: detectedSlot.slotId,
+          bbox: detectedSlot.bbox,
+          status: "empty" as const, // Start all slots as empty
+          lastUpdated: new Date(),
+        }))
+      : Array.from({ length: data.totalSlots }, (_, index) => ({
+          slotId: index + 1,
+          bbox: {
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: 0,
+          },
+          status: "empty" as const,
+          lastUpdated: new Date(),
+        }));
 
     // Create parking lot
     const parkingLot = await ParkingLot.create({

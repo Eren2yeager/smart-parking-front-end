@@ -62,10 +62,11 @@ export default function LiveMonitorPage() {
   const [signalingUrl] = useState(
     process.env.NEXT_PUBLIC_AI_BACKEND_WS_URL || "ws://localhost:8000",
   );
-  const [remoteFps] = useState(10);
+  const [remoteFps] = useState(2); // Reduced from 10 to 2 FPS to prevent queue buildup
   const [lastDetection, setLastDetection] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const isProcessingRef = useRef(false); // Track processing state to prevent frame queue buildup
 
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const remoteCanvasRef = useRef<HTMLCanvasElement>(null);

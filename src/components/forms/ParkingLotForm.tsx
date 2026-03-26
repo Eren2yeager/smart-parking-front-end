@@ -33,6 +33,17 @@ const parkingLotSchema = z.object({
     .min(1, 'Total slots must be at least 1')
     .max(500, 'Total slots must be at most 500'),
   contractorId: z.string().min(1, 'Contractor is required'),
+  detectedSlots: z.array(z.object({
+    slotId: z.number(),
+    status: z.string(),
+    confidence: z.number(),
+    bbox: z.object({
+      x1: z.number(),
+      y1: z.number(),
+      x2: z.number(),
+      y2: z.number(),
+    }),
+  })).optional(),
 });
 
 type ParkingLotFormData = z.infer<typeof parkingLotSchema>;
@@ -99,6 +110,7 @@ export default function ParkingLotForm({
     },
     totalSlots: initialData?.totalSlots || 10,
     contractorId: initialData?.contractorId || '',
+    detectedSlots: undefined,
   };
 
   const [formData, setFormData, clearFormData, hasRestoredData] = useFormPersistence(
@@ -215,7 +227,19 @@ export default function ParkingLotForm({
       const avgConfidence = result.slots?.length > 0
         ? result.slots.reduce((sum: number, slot: any) => sum + (slot.confidence || 0), 0) / result.slots.length
         : 0;
-      const slots = result.slots || [];
+      
+      // Map slots with bbox information
+      const slots = (result.slots || []).map((slot: any) => ({
+        slotId: slot.slot_id || slot.slotId,
+        status: slot.status || 'empty',
+        confidence: slot.confidence || 0,
+        bbox: slot.bbox || {
+          x1: slot.x1 || 0,
+          y1: slot.y1 || 0,
+          x2: slot.x2 || 0,
+          y2: slot.y2 || 0,
+        },
+      }));
 
       setDetectionResult({
         totalSlots,
@@ -227,6 +251,9 @@ export default function ParkingLotForm({
       if (totalSlots > 0) {
         handleChange('totalSlots', totalSlots);
       }
+      
+      // Store detected slots with bbox in form data for submission
+      handleChange('detectedSlots', slots);
     } catch (error: any) {
       console.error('Error detecting slots:', error);
       setApiError(error.message || 'Failed to detect parking slots. Make sure the Python backend is running.');

@@ -24,6 +24,17 @@ const updateParkingLotSchema = z.object({
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid contractor ID")
     .optional(),
   status: z.enum(["active", "inactive"]).optional(),
+  detectedSlots: z.array(z.object({
+    slotId: z.number().int().min(1),
+    status: z.string(),
+    confidence: z.number().min(0).max(1),
+    bbox: z.object({
+      x1: z.number(),
+      y1: z.number(),
+      x2: z.number(),
+      y2: z.number(),
+    }),
+  })).optional(),
 });
 
 /**
@@ -148,13 +159,59 @@ export async function PUT(
 
     const data = validationResult.data;
 
+    // Fetch existing parking lot to check if totalSlots changed
+    const existingParkingLot = await ParkingLot.findById(id);
+    if (!existingParkingLot) {
+      return NextResponse.json(
+        {
+          error: "Resource not found",
+          message: `Parking lot with ID '${id}' does not exist`,
+        },
+        { status: 404 },
+      );
+    }
+
+    // Prepare update data
+    const updateData: any = {
+      ...data,
+      updatedAt: new Date(),
+    };
+
+    // If detectedSlots are provided, update the slots array with bbox
+    if (data.detectedSlots && data.detectedSlots.length > 0) {
+      updateData.slots = data.detectedSlots.map((detectedSlot) => ({
+        slotId: detectedSlot.slotId,
+        bbox: detectedSlot.bbox,
+        status: "empty" as const, // Reset to empty when updating slots
+        lastUpdated: new Date(),
+      }));
+    }
+    // If totalSlots changed but no detectedSlots, resize slots array
+    else if (data.totalSlots && data.totalSlots !== existingParkingLot.totalSlots) {
+      const currentSlots = existingParkingLot.slots || [];
+      
+      if (data.totalSlots > currentSlots.length) {
+        // Add new slots
+        const newSlots = Array.from(
+          { length: data.totalSlots - currentSlots.length },
+          (_, index) => ({
+            slotId: currentSlots.length + index + 1,
+            bbox: { x1: 0, y1: 0, x2: 0, y2: 0 },
+            status: "empty" as const,
+            lastUpdated: new Date(),
+          })
+        );
+        updateData.slots = [...currentSlots, ...newSlots];
+      } else {
+        // Remove excess slots
+        updateData.slots = currentSlots.slice(0, data.totalSlots);
+      }
+    }
+
     // Update parking lot
     const parkingLot = await ParkingLot.findByIdAndUpdate(
       id,
-      {
-        ...data,
-        updatedAt: new Date(),
-      },
+      updateData,
       { new: true, runValidators: true },
     ).lean();
 

@@ -7,6 +7,7 @@ import Contractor from "@/models/Contractor";
 import Violation from "@/models/Violation";
 import Alert from "@/models/Alert";
 import { getSSEManager } from "@/lib/realtime/sse-manager";
+import { matchSlotsHybrid, getMatchingStats } from "@/lib/utils/bbox-matcher";
 
 // Validation schema for capacity update
 const capacityUpdateSchema = z.object({
@@ -20,6 +21,12 @@ const capacityUpdateSchema = z.object({
       slotId: z.number().int().min(1),
       status: z.enum(["occupied", "empty"]),
       confidence: z.number().min(0).max(1),
+      bbox: z.object({
+        x1: z.number(),
+        y1: z.number(),
+        x2: z.number(),
+        y2: z.number(),
+      }).optional(),
     }),
   ),
   processingTime: z.number().min(0).optional().default(0),
@@ -91,21 +98,50 @@ export async function POST(request: NextRequest) {
       processingTime: data.processingTime,
     });
 
-    // Update ParkingLot slots array
+    // Update ParkingLot slots array using bbox matching
+    // This ensures accurate slot updates even when slot IDs don't match perfectly
+    
+    // Prepare detected slots with bbox for matching
+    const detectedSlotsWithBBox = data.slots.map(slot => ({
+      slotId: slot.slotId,
+      status: slot.status,
+      confidence: slot.confidence,
+      bbox: slot.bbox || { x1: 0, y1: 0, x2: 0, y2: 0 },
+    }));
+
+    // Prepare DB slots with bbox for matching
+    const dbSlotsWithBBox = parkingLot.slots.map(slot => ({
+      slotId: slot.slotId,
+      bbox: slot.bbox,
+      status: slot.status,
+    }));
+
+    // Match detected slots with DB slots using hybrid approach (bbox + slot ID)
+    const matches = matchSlotsHybrid(detectedSlotsWithBBox, dbSlotsWithBBox, 0.3);
+    
+    // Get matching statistics for logging
+    const stats = getMatchingStats(matches, detectedSlotsWithBBox, dbSlotsWithBBox);
+    console.log('[Capacity Update] Slot matching stats:', stats);
+
+    // Update slots based on matches
     const updatedSlots = parkingLot.slots.map((slot) => {
-      const updatedSlot = data.slots.find((s) => s.slotId === slot.slotId);
-      if (updatedSlot) {
+      const matchedDetectedSlot = matches.get(slot.slotId);
+      
+      if (matchedDetectedSlot) {
+        // Update with detected status
         return {
           slotId: slot.slotId,
-          bbox: slot.bbox,
-          status: updatedSlot.status,
+          bbox: slot.bbox, // Keep original bbox from DB
+          status: matchedDetectedSlot.status as "occupied" | "empty",
           lastUpdated: new Date(),
         };
       }
+      
+      // Slot not detected - keep current status
       return {
         slotId: slot.slotId,
         bbox: slot.bbox,
-        status: slot.status,
+        status: slot.status as "occupied" | "empty",
         lastUpdated: slot.lastUpdated,
       };
     });

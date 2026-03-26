@@ -6,6 +6,7 @@ import CapacityLog from "@/models/CapacityLog";
 import Alert from "@/models/Alert";
 import Violation from "@/models/Violation";
 import Contractor from "@/models/Contractor";
+import { matchSlotsHybrid, getMatchingStats } from "@/lib/utils/bbox-matcher";
 
 // Validation schema for updating slots
 const updateSlotsSchema = z.object({
@@ -13,6 +14,13 @@ const updateSlotsSchema = z.object({
     z.object({
       slotId: z.number().int().min(1),
       status: z.enum(["occupied", "empty"]),
+      confidence: z.number().min(0).max(1).optional(),
+      bbox: z.object({
+        x1: z.number(),
+        y1: z.number(),
+        x2: z.number(),
+        y2: z.number(),
+      }).optional(),
     }),
   ),
   detectedSlots: z.number().int().min(0).optional(), // Total slots detected by AI
@@ -110,7 +118,29 @@ export async function PUT(
     const now = new Date();
     let updatedCount = 0;
 
-    // MAIN LOGIC: Check occupied count first
+    // Prepare detected slots with bbox for matching
+    const detectedSlotsWithBBox = detectedSlots.map(slot => ({
+      slotId: slot.slotId,
+      status: slot.status,
+      confidence: slot.confidence || 0.85,
+      bbox: slot.bbox || { x1: 0, y1: 0, x2: 0, y2: 0 },
+    }));
+
+    // Prepare DB slots with bbox for matching
+    const dbSlotsWithBBox = parkingLot.slots.map(slot => ({
+      slotId: slot.slotId,
+      bbox: slot.bbox,
+      status: slot.status,
+    }));
+
+    // Match detected slots with DB slots using hybrid approach (bbox + slot ID)
+    const matches = matchSlotsHybrid(detectedSlotsWithBBox, dbSlotsWithBBox, 0.3);
+    
+    // Get matching statistics for logging
+    const stats = getMatchingStats(matches, detectedSlotsWithBBox, dbSlotsWithBBox);
+    console.log('[Slots Update] Slot matching stats:', stats);
+
+    // MAIN LOGIC: Update slots based on AI detection using bbox matching
 
     // Case 1: AI detected MORE occupied than DB total slots → VIOLATION (Overparking)
     if (aiOccupied > parkingLot.totalSlots) {
@@ -223,44 +253,54 @@ export async function PUT(
     else if (aiOccupied === parkingLot.totalSlots) {
       adjustmentNote = `CAPACITY FULL: All ${parkingLot.totalSlots} slots are occupied.`;
 
-      // Update all DB slots to occupied
+      // Update slots based on bbox matching
       parkingLot.slots.forEach((slot) => {
-        if (slot.status !== "occupied") {
-          slot.status = "occupied";
-          slot.lastUpdated = now;
-          updatedCount++;
+        const matchedDetectedSlot = matches.get(slot.slotId);
+        if (matchedDetectedSlot) {
+          // Update with detected status
+          if (slot.status !== matchedDetectedSlot.status) {
+            slot.status = matchedDetectedSlot.status as "occupied" | "empty";
+            slot.lastUpdated = now;
+            updatedCount++;
+          }
+        } else {
+          // Slot not detected - mark as occupied (since we're at full capacity)
+          if (slot.status !== "occupied") {
+            slot.status = "occupied";
+            slot.lastUpdated = now;
+            updatedCount++;
+          }
         }
       });
     }
-    // Case 3: Normal operation - update slots in sequence
+    // Case 3: Normal operation - update slots by bbox matching
     else {
-      // If AI detected fewer slots than DB, update what we can see
-      if (aiDetectedTotal < parkingLot.totalSlots) {
-        adjustmentNote = `AI detected ${aiDetectedTotal} slots (${aiOccupied} occupied). DB has ${parkingLot.totalSlots} slots. Updated ${aiDetectedTotal} visible slots, rest unchanged.`;
-      }
-      // If AI detected more slots than DB, only update up to DB total
-      else if (aiDetectedTotal > parkingLot.totalSlots) {
-        adjustmentNote = `AI detected ${aiDetectedTotal} slots (${aiOccupied} occupied). DB has ${parkingLot.totalSlots} slots. Updated first ${parkingLot.totalSlots} slots.`;
-      }
-
-      // Update slots in sequence (1, 2, 3, ...)
-      const slotsToUpdate = Math.min(
-        detectedSlots.length,
-        parkingLot.totalSlots,
-      );
-
-      for (let i = 0; i < slotsToUpdate; i++) {
-        const detectedSlot = detectedSlots[i];
-        const dbSlot = parkingLot.slots.find((s) => s.slotId === i + 1);
-
-        if (dbSlot && dbSlot.status !== detectedSlot.status) {
-          dbSlot.status = detectedSlot.status;
-          dbSlot.lastUpdated = now;
-          updatedCount++;
+      // Update slots based on bbox matching
+      parkingLot.slots.forEach((slot) => {
+        const matchedDetectedSlot = matches.get(slot.slotId);
+        if (matchedDetectedSlot) {
+          // Update with detected status
+          if (slot.status !== matchedDetectedSlot.status) {
+            slot.status = matchedDetectedSlot.status as "occupied" | "empty";
+            slot.lastUpdated = now;
+            updatedCount++;
+          }
         }
-      }
+        // If slot not matched by AI, keep its current status (don't change)
+      });
 
-      // Remaining slots stay as they are (not changed)
+      // Generate adjustment note
+      const matchedSlotIds = Array.from(matches.keys()).sort((a, b) => a - b);
+      const minMatched = matchedSlotIds.length > 0 ? Math.min(...matchedSlotIds) : 0;
+      const maxMatched = matchedSlotIds.length > 0 ? Math.max(...matchedSlotIds) : 0;
+      
+      if (aiDetectedTotal < parkingLot.totalSlots) {
+        adjustmentNote = `AI detected ${aiDetectedTotal} slots (${aiOccupied} occupied, ${aiEmpty} empty). DB has ${parkingLot.totalSlots} slots. Matched ${matches.size} slots using bbox, rest unchanged.`;
+      } else if (aiDetectedTotal > parkingLot.totalSlots) {
+        adjustmentNote = `AI detected ${aiDetectedTotal} slots (${aiOccupied} occupied, ${aiEmpty} empty). DB has ${parkingLot.totalSlots} slots. Matched ${matches.size} slots using bbox.`;
+      } else {
+        adjustmentNote = `AI detected ${aiDetectedTotal} slots (${aiOccupied} occupied, ${aiEmpty} empty). Matched ${matches.size}/${parkingLot.totalSlots} slots using bbox.`;
+      }
     }
 
     // Save updated parking lot
