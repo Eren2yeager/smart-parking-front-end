@@ -1,7 +1,6 @@
-'use client'
 import { redirect } from "next/navigation";
-import { getSession } from "next-auth/react";
-import { Shield, Users, TrendingUp, Clock } from "lucide-react";
+import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { Shield, Users, TrendingUp, Clock, ArrowRight } from "lucide-react";
 import Hyperspeed from "@/components/shadcnComponents/Hyperspeed";
 import { AnimatedCarIcon } from "@/components/icons/animated-car";
 import { AnimatedCameraIcon } from "@/components/icons/animated-camera";
@@ -11,16 +10,16 @@ import { MapPinIcon } from "@/components/icons/map-pin";
 import { FeatureCard } from "@/components/landing/feature-card";
 import { StatCard } from "@/components/landing/stat-card";
 import { FeatureSection } from "@/components/landing/feature-section";
+import { HeroButtons } from "@/components/landing/hero-buttons";
 import { FloatingOrbs } from "@/components/landing/floating-orbs";
 import { ScrollIndicator } from "@/components/landing/scroll-indicator";
-import { HeroButtons } from "@/components/landing/hero-buttons";
 import GradualBlur from "@/components/shadcnComponents/GradualBlur";
-export default  function Home() {
+export default async function Home() {
   let isAuthenticated = false;
-  
+
   // Check authentication status
   try {
-    const {data : session} = getSession();
+    const session = await auth();
     if (session?.user) {
       isAuthenticated = true;
       // Check if user needs to set up password
@@ -99,8 +98,8 @@ export default  function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
           {/* Header */}
           <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-25 h-25 rounded-2xl shadow-lg mb-6 hover:scale-110 transition-transform">
-              <AnimatedCarIcon className="w-25 h-25" />
+            <div className="inline-flex items-center justify-center w-30 h-30 rounded-2xl shadow-lg mb-6 hover:scale-110 transition-transform">
+              <AnimatedCarIcon className="w-30 h-30" />
             </div>
             <h1 className="text-5xl md:text-6xl font-bold pb-6  bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white">
               Smart Parking Management
@@ -109,7 +108,7 @@ export default  function Home() {
               Real-time parking capacity enforcement and monitoring system for
               Municipal Corporations
             </p>
-            <HeroButtons isAuthenticated={isAuthenticated} wantSignInButton={true}/>
+            <HeroButtons isAuthenticated={isAuthenticated} wantSignInButton={true} />
           </div>
 
           {/* Feature Grid */}
@@ -239,7 +238,7 @@ export default  function Home() {
           <p className="text-xl text-blue-200 mb-8">
             Join municipal corporations using our smart parking solution
           </p>
-          <HeroButtons isAuthenticated={isAuthenticated} />
+          <HeroButtons isAuthenticated={isAuthenticated} wantSignInButton={false} />
         </div>
       </div>
     </div>
