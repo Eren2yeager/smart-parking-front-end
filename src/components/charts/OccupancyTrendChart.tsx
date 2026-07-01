@@ -197,24 +197,24 @@ export default function OccupancyTrendChart({
                 padding: '12px',
                 color: '#e5e7eb'
               }}
-              formatter={(value: number | undefined, name: string | undefined) => {
+              formatter={(value: any, name: any) => {
                 if (value === undefined) return ['N/A', name || 'Unknown'];
                 if (name === 'occupancyRate') {
-                  return [`${value.toFixed(1)}%`, 'Occupancy Rate'];
+                  return [`${Number(value).toFixed(1)}%`, 'Occupancy Rate'];
                 }
                 if (name === 'avgOccupied') {
-                  return [value.toFixed(1), 'Avg Occupied'];
+                  return [Number(value).toFixed(1), 'Avg Occupied'];
                 }
                 if (name === 'maxOccupied') {
-                  return [Math.round(value), 'Max Occupied'];
+                  return [Math.round(Number(value)), 'Max Occupied'];
                 }
                 if (name === 'minOccupied') {
-                  return [Math.round(value), 'Min Occupied'];
+                  return [Math.round(Number(value)), 'Min Occupied'];
                 }
                 if (name === 'capacity') {
-                  return [Math.round(value), 'Total Capacity'];
+                  return [Math.round(Number(value)), 'Total Capacity'];
                 }
-                return [Math.round(value), name];
+                return [Math.round(Number(value)), name];
               }}
             />
             <Legend

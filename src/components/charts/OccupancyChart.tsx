@@ -157,12 +157,12 @@ export default function OccupancyChart({ parkingLotId, hours = 24 }: OccupancyCh
               padding: '8px 12px',
               fontSize: isMobile ? '12px' : '14px',
             }}
-            formatter={(value: number | undefined, name: string | undefined) => {
+            formatter={(value: any, name: any) => {
               if (value === undefined) return ['N/A', name || 'Unknown'];
               if (name === 'rate') {
-                return [`${value.toFixed(1)}%`, 'Occupancy Rate'];
+                return [`${Number(value).toFixed(1)}%`, 'Occupancy Rate'];     
               }
-              return [Math.round(value), name === 'occupied' ? 'Occupied' : 'Capacity'];
+              return [Math.round(Number(value)), name === 'occupied' ? 'Occupied' : 'Capacity'];
             }}
           />
           {!isMobile && (

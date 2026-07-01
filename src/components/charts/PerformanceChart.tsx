@@ -81,18 +81,18 @@ export default function PerformanceChart({
               borderRadius: '8px',
               padding: '12px',
             }}
-            formatter={(value: number | undefined, name: string | undefined) => {
+            formatter={(value: any, name: any) => {
               if (value === undefined) return ['N/A', name || 'Unknown'];
               if (name === 'rate') {
-                return [`${value.toFixed(1)}%`, 'Occupancy Rate'];
+                return [`${Number(value).toFixed(1)}%`, 'Occupancy Rate'];
               }
               if (name === 'occupancy') {
-                return [Math.round(value), 'Avg Occupancy'];
+                return [Math.round(Number(value)), 'Avg Occupancy'];
               }
               if (name === 'allocated') {
-                return [Math.round(value), 'Allocated Capacity'];
+                return [Math.round(Number(value)), 'Allocated Capacity'];
               }
-              return [Math.round(value), name];
+              return [Math.round(Number(value)), name];
             }}
           />
           <Legend

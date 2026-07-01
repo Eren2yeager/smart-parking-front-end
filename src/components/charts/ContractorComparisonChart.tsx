@@ -201,10 +201,10 @@ export default function ContractorComparisonChart({
                   padding: '12px',
                   color: '#e5e7eb'
                 }}
-                formatter={(value: number | undefined, name: string | undefined) => {
+                formatter={(value: any, name: any) => {
                   if (value === undefined) return ['N/A', name || 'Unknown'];
                   if (name === 'complianceRate') {
-                    return [`${value.toFixed(1)}%`, 'Compliance Rate'];
+                    return [`${Number(value).toFixed(1)}%`, 'Compliance Rate']; 
                   }
                   return [value, name];
                 }}
@@ -247,7 +247,7 @@ export default function ContractorComparisonChart({
                   padding: '12px',
                   color: '#e5e7eb'
                 }}
-                formatter={(value: number | undefined, name: string | undefined) => {
+                formatter={(value: any, name: any) => {
                   if (value === undefined) return ['N/A', name || 'Unknown'];
                   if (name === 'violations') {
                     return [value, 'Violations'];
